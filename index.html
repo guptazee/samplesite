@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alex Fitness
     </title>
-
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <script src="https://kit.fontawesome.com/1466c5a21b.js" crossorigin="anonymous"></script>
 </head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,13 +69,13 @@
         font-family: 'Rubik', sans-serif;
         display: block;
         /* border: 2px solid green; */
-        width: 30%;
+        width: 40%;
         margin: 10px auto;
     }
 
     .nav li {
         display: inline-block;
-        padding: 15px;
+        padding: 25px;
         text-decoration: none;
         font-size: 20px;
     }
@@ -112,6 +113,42 @@
         /* color: grey; */
         background-color: rgb(21, 133, 198);
     }
+    .container {
+        /* border: 2px solid white; */
+        margin: 10px auto;
+        padding: 16px;
+        width: 33%;
+        border-radius: 28px;
+    }
+
+    .form-group input {
+        /* font-family: 'Baloo Bhai', cursive; */
+        text-align: center;
+        display: block;
+        width: 508px;
+        padding: 1px;
+        border: 2px solid black;
+        margin: 11px auto;
+        font-size: 25px;
+        border-radius: 15px;
+        background-color: rgba(61, 55, 55, 0.3);
+    }
+    .form-group input:hover{
+        background-color: rgba(31, 28, 28, 0.5);
+    }                                               
+    .container h1 {
+        color: rgb(7, 209, 255);
+        text-align: center;
+    }
+
+    .container button {
+        display: block;
+        width: 102%;
+        margin: 20px auto;
+    }
+    ::placeholder{
+        color: rgb(28, 25, 25);
+    }
 </style>
 
 <body>
@@ -122,16 +159,41 @@
         </div>
         <div class="mid">
             <ul class="nav">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Plans</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="#"> <i class="fas fa-home"></i>Home</a></li>
+                <li><a href="#"><i class="fas fa-question-circle"></i>About</a></li>
+                <li><a href="#"><i class="fa fa-inr"></i>Plans</a></li>
+                <li><a href="#"> <i class="fas fa-paper-plane"></i> Contact</a></li>
             </ul>
         </div>
-        <div class="right">
-            <button class="btn"> Login </button>
+        <div class="right"> 
+            <button class="btn" style='font-size:24px'>Login <i class='fas fa-user-circle'></i></button>
         </div>
     </header>
+    <div class="container">
+        <h1>Join the best gym of Delhi now</h1>
+        <p style="color: black;">Please complete the form below to help us setup our fitness club in your city </p>
+        <form action="noaction.php">
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Name">
+            </div>
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Age">
+            </div>
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Gender">
+            </div>
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Locality">
+            </div>
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Email Id">
+            </div>
+            <div class="form-group">
+                <input type="text" name="" placeholder="Enter your Phone Number">
+            </div>
+            <button class="btn">Submit</button>
+        </form>
+    </div>
 </body>
 
 </html>
