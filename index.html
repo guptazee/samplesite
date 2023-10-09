@@ -4,196 +4,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alex Fitness
-    </title>
-    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-    <script src="https://kit.fontawesome.com/1466c5a21b.js" crossorigin="anonymous"></script>
+    <title>new project</title>
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+        }
+        header::before{
+            background: url('https://source.unsplash.com/collection/190727/1600x900') no-repeat center center/cover;
+            content: "";
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+            filter: blur(2px);
+
+            }
+            .nav {
+                    display: flex;
+            }
+        .nav li {
+            list-style: none;
+            padding: 16px 23px;
+        }
+        .nav li a{
+        font-size: 20px;
+            text-decoration: none;
+            color: white;
+        }
+        .nav li a:hover{
+            color: red;
+        }
+        .btn{
+            position: absolute;
+            right: 17px;
+            top: 20px;
+            background-color: red;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 22px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .btn:hover{
+            background-color: rgb(211, 0, 0);
+        }
+        section {
+            height: 344px;
+            font-family: 'Bree Serif', serif;
+            margin: 3px 230px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 {
+            font-size: 4rem;
+        }
+        p {
+            text-align: center;
+        }
+
+    </style>
 </head>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2&family=Dela+Gothic+One&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap" rel="stylesheet">
-<style>
-    /* css reset  */
-    body {
-        font-family: 'Baloo Bhai 2', cursive;
-        font-family: 'Dela Gothic One', cursive;
-        color: white;
-        margin: 0px;
-        padding: 0px;
-        background: url('img/bg.jpg');
-        background-repeat: no-repeat;
-        background-size: cover;
-        height: 800px;
-    }
-
-    header {
-        background-color: rgba(128, 128, 128, 0.3);
-        /* border: 2px solid rgba(91, 89, 89, 0.5); */
-        padding: 5px;
-    }
-
-    .left {
-        display: inline-block;
-        position: absolute;
-        left: 20px;
-        top: 5px;
-        /* border: 2px solid red; */
-
-    }
-
-    .left img {
-        /* width: 136px; */
-        height: 70px;
-    }
-    .left img:hover{
-        cursor: pointer;
-    }
-
-    .left div {
-        font-family: 'Baloo Bhai 2', cursive;
-        color: rgb(255, 255, 255);
-        line-height: 0px;
-        font-size: 20px;
-        text-align: center;
-    }
-
-    .left div a {
-        text-decoration: none;
-        color: white;
-    }
-
-    .mid {
-        font-family: 'Rubik', sans-serif;
-        display: block;
-        /* border: 2px solid green; */
-        width: 40%;
-        margin: 10px auto;
-    }
-
-    .nav li {
-        display: inline-block;
-        padding: 25px;
-        text-decoration: none;
-        font-size: 20px;
-    }
-
-    .nav li a  {
-        text-decoration: none;
-        color: black;
-    }
-
-    .nav li a:hover , .nav li a.active {
-        color: rgb(132, 97, 97);
-    }
-
-    .right {
-        position: absolute;
-        right: 15px;
-        top: 30px;
-        display: inline-block;
-        /* border: 2px solid yellow; */
-    }
-
-    .btn {
-        font-family: Arial, Helvetica, sans-serif;
-        margin: 0px 9px;
-        background-color: rgb(31 174 255);
-        color: white;
-        padding: 4px 14px;
-        border: 0px solid grey;
-        border-radius: 20px;
-        font-size: 20px;
-        cursor: pointer;
-    }
-
-    .btn:hover {
-        /* color: grey; */
-        background-color: rgb(21, 133, 198);
-    }
-    .container {
-        /* border: 2px solid white; */
-        margin: 10px auto;
-        padding: 16px;
-        width: 33%;
-        border-radius: 28px;
-    }
-
-    .form-group input {
-        /* font-family: 'Baloo Bhai', cursive; */
-        text-align: center;
-        display: block;
-        width: 508px;
-        padding: 1px;
-        border: 2px solid black;
-        margin: 11px auto;
-        font-size: 25px;
-        border-radius: 15px;
-        background-color: rgba(61, 55, 55, 0.3);
-    }
-    .form-group input:hover{
-        background-color: rgba(31, 28, 28, 0.5);
-    }                                               
-    .container h1 {
-        color: rgb(7, 209, 255);
-        text-align: center;
-    }
-
-    .container button {
-        display: block;
-        width: 102%;
-        margin: 20px auto;
-    }
-    ::placeholder{
-        color: rgb(28, 25, 25);
-    }
-</style>
 
 <body>
     <header>
-        <div class="left">
-            <img src="img/logo.png" alt="">
-            <div><a href="#">Alex Fitness</a></div>
-        </div>
-        <div class="mid">
+        <nav class="navbar">
             <ul class="nav">
-                <li><a href="#"> <i class="fas fa-home"></i>Home</a></li>
-                <li><a href="#"><i class="fas fa-question-circle"></i>About</a></li>
-                <li><a href="#"><i class="fa fa-inr"></i>Plans</a></li>
-                <li><a href="#"> <i class="fas fa-paper-plane"></i> Contact</a></li>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About us</a></li>
+                <li><a href="#">Plans</a></li>
+                <li><a href="#">Contact us</a></li>
+                <li><button class="btn">Login</button></li>
             </ul>
-        </div>
-        <div class="right"> 
-            <button class="btn" style='font-size:24px'>Login <i class='fas fa-user-circle'></i></button>
-        </div>
+        </nav>
+
     </header>
-    <div class="container">
-        <h1>Join the best gym of Delhi now</h1>
-        <p style="color: black;">Please complete the form below to help us setup our fitness club in your city </p>
-        <form action="noaction.php">
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Name">
-            </div>
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Age">
-            </div>
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Gender">
-            </div>
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Locality">
-            </div>
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Email Id">
-            </div>
-            <div class="form-group">
-                <input type="text" name="" placeholder="Enter your Phone Number">
-            </div>
-            <button class="btn">Submit</button>
-        </form>
-    </div>
+    <section>
+        <h1>Sample Website for Practise</h1>
+        <p>This is a simple website using display flex for navigation bar and using pseudo selector Header::before for background image made just for practising.</p>
+    </section>
 </body>
 
 </html>
