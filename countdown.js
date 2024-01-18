@@ -1,6 +1,6 @@
 // Function to update the countdown timer
 function updateCountdown() {
-    const countdownDate = new Date('2023-12-31'); // Specify your target date here (e.g., December 31, 2023)
+    const countdownDate = new Date('2024-12-31'); // Specify your target date here (e.g., December 31, 2023)
     const now = new Date(); // Get the current date and time
     const timeRemaining = countdownDate - now; // Calculate the time remaining in milliseconds
 
