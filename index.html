@@ -1,88 +1,118 @@
 <!DOCTYPE html>
+<html lang="en" class="transition-colors duration-300">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1; /* Place the pseudo-element behind content */
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          animation: {
+            fadeIn: "fadeIn 1.5s ease-in-out",
+            bounceSlow: "bounce 3s infinite"
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          }
+        }
+      }
+    }
+  </script>
+  <script>
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
 
-video {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0.9; /* Adjust the opacity as needed */
-    /* filter: blur(2px); */
-}
+    // Scroll animation
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fadeIn');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
 
-/* Style the rest of your content as needed */
-h1 {
-    text-align: center;
-    color: white;
-    font-size: 2rem;
-    position: relative;
-    z-index: 1; /* Ensure content appears above the video */
-}
-p{
-    margin: 50px;
-    font-size: 1.5rem;
-    text-align: center;
-    color: white;
-    font-size: 6.5rem;
-    position: relative;
-    z-index: 1; /* Ensure content appears above the video */
-}
-       
-div #countdown-timer{
-    background-color:rgba(220, 31, 31,0.5);
-    width: 30%;
-    position: absolute;
-    left: 34%;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    font-size: 1.5rem;
-    position: relative;
-    z-index: 1; /* Ensure content appears above the video */
-}
-    </style>
+      document.querySelectorAll('.reveal').forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
 </head>
-<body>
-    <header>
-        
-        <video autoplay muted loop>
-            <source src="bg.mp4" type="video/mp4">
-            <source src="video.webm" type="video/webm"> -->
-            Include additional source elements for other formats if needed -->
-            Your browser does not support the video tag.
-        </video> 
-        <!--  <h1>Welcome to My Shop </h1> -->
-       
-       <div id="countdown">
-            <p>Coming Soon</p>
-            <div id="countdown-timer"></div>
-        </div> 
-    </header> 
-  <!--      <img src="git.png" />
-        <h3> Github Student Developer Pack </h3>
-        <h4>3$ each</h4>
-    <script src="https://www.paypal.com/sdk/js?client-id=BAAfVdDOmbKiUJhhoy5iZ_G2dzZiBVR4enWRIfY0fxNUyLayiPGn9PZPKHoERLRDD1GxGuNff1OTRgHgLY&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
-<div id="paypal-container-3E2PQCLB45C46"></div>
-<script>
-  paypal.HostedButtons({
-    hostedButtonId: "3E2PQCLB45C46",
-  }).render("#paypal-container-3E2PQCLB45C46") -->
-</script>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+  <!-- Navbar -->
+  <nav class="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+    <h1 class="text-xl font-bold">Your Name</h1>
+    <div class="space-x-4">
+      <a href="#about" class="hover:text-blue-500">About</a>
+      <a href="#projects" class="hover:text-blue-500">Projects</a>
+      <a href="#skills" class="hover:text-blue-500">Skills</a>
+      <a href="#contact" class="hover:text-blue-500">Contact</a>
+      <button onclick="toggleDarkMode()" class="ml-4 px-2 py-1 border rounded hover:bg-gray-100 dark:hover:bg-gray-700">🌙</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="text-center py-20 px-4 bg-blue-100 dark:bg-blue-950 reveal">
+    <h2 class="text-3xl font-bold mb-2 animate-bounceSlow">Hi, I'm Your Name 👋</h2>
+    <p class="text-lg">A passionate web developer</p>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="py-16 px-6 reveal">
+    <h3 class="text-2xl font-semibold mb-4">About Me</h3>
+    <p class="max-w-2xl">I'm a web developer with a focus on creating responsive, interactive, and visually appealing websites. I enjoy turning ideas into digital reality.</p>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="bg-white dark:bg-gray-800 py-16 px-6 reveal">
+    <h3 class="text-2xl font-semibold mb-6">Projects</h3>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 border rounded-lg shadow-sm hover:shadow-lg transition duration-300 transform hover:scale-105 bg-white dark:bg-gray-700">
+        <h4 class="font-bold text-lg">Project One</h4>
+        <p class="text-sm">Short description of the project goes here.</p>
+      </div>
+      <div class="p-4 border rounded-lg shadow-sm hover:shadow-lg transition duration-300 transform hover:scale-105 bg-white dark:bg-gray-700">
+        <h4 class="font-bold text-lg">Project Two</h4>
+        <p class="text-sm">Another brief description.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills" class="py-16 px-6 bg-gray-100 dark:bg-gray-900 reveal">
+    <h3 class="text-2xl font-semibold mb-6">Skills</h3>
+    <ul class="flex flex-wrap gap-4">
+      <li class="bg-white dark:bg-gray-800 px-4 py-2 rounded shadow hover:scale-110 transition-transform">HTML</li>
+      <li class="bg-white dark:bg-gray-800 px-4 py-2 rounded shadow hover:scale-110 transition-transform">CSS</li>
+      <li class="bg-white dark:bg-gray-800 px-4 py-2 rounded shadow hover:scale-110 transition-transform">JavaScript</li>
+      <li class="bg-white dark:bg-gray-800 px-4 py-2 rounded shadow hover:scale-110 transition-transform">React</li>
+      <li class="bg-white dark:bg-gray-800 px-4 py-2 rounded shadow hover:scale-110 transition-transform">Tailwind CSS</li>
+    </ul>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-16 px-6 reveal">
+    <h3 class="text-2xl font-semibold mb-4">Contact Me</h3>
+    <form class="max-w-md space-y-4">
+      <input type="text" placeholder="Name" class="w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600" required />
+      <input type="email" placeholder="Email" class="w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600" required />
+      <textarea placeholder="Your Message" class="w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600" rows="4"></textarea>
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Send</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 text-sm text-gray-600 dark:text-gray-400 reveal">
+    © 2025 Your Name. All rights reserved.
+  </footer>
 </body>
 </html>
