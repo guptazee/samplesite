@@ -3,126 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Realistic Carrom</title>
+    <title>Carrom Fixed</title>
     <style>
         body {
+            background-color: #1e272e;
+            color: white;
+            font-family: sans-serif;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
-            background-color: #1e272e;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #d2dae2;
-            overflow: hidden;
-            touch-action: none;
+            overflow: hidden; /* No scrolling */
+            touch-action: none; /* No zooming */
         }
+        h2 { margin: 10px 0; font-size: 20px; }
         canvas {
-            background-color: #fceeb5; /* Polished wood color */
-            border: 20px solid #5d4037; /* Dark Wood Frame */
-            border-radius: 15px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.3), 0 20px 30px rgba(0,0,0,0.5);
-            width: 95%;
+            background-color: #fceeb5;
+            border: 15px solid #5d4037;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* Responsive Sizing */
+            width: 90vw; 
             max-width: 600px;
-            height: auto;
+            height: auto; 
+            aspect-ratio: 1 / 1;
+            touch-action: none; /* Critical for mobile */
             cursor: pointer;
-            touch-action: none;
         }
         .controls {
             margin-top: 15px;
-            text-align: center;
             width: 90%;
-            max-width: 400px;
+            text-align: center;
         }
         button {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+            padding: 15px;
+            font-size: 18px;
+            background: #e74c3c;
             color: white;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #96281b;
-            transition: transform 0.1s;
+            width: 100%;
+            max-width: 300px;
         }
-        button:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-        p { margin-bottom: 10px; font-size: 14px; opacity: 0.8; }
-        .instruction { font-size: 12px; color: #ffdd59; margin-bottom: 5px; }
+        p { font-size: 14px; color: #ccc; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h2 style="margin: 10px 0; text-shadow: 2px 2px 4px black;">Pro Carrom 3D</h2>
-    <div class="instruction">Tap anywhere first to enable Sound!</div>
+    <h2>Carrom 3D (Fixed)</h2>
     <canvas id="carromBoard" width="600" height="600"></canvas>
+    
     <div class="controls">
-        <p id="status">Drag Striker to Position &bull; Pull to Shoot</p>
-        <button onclick="resetGame()">Reset Board</button>
+        <p id="status">Tap Striker to Start!</p>
+        <button onclick="resetGame()">Reset Game</button>
     </div>
 
 <script>
     const canvas = document.getElementById('carromBoard');
     const ctx = canvas.getContext('2d');
+    const statusText = document.getElementById('status');
 
-    // --- AUDIO SYSTEM (Procedural - No files needed) ---
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = new AudioContext();
+    // --- AUDIO SYSTEM (Safe Mode) ---
+    // We only create audio context AFTER user interaction to prevent crashes
+    let audioCtx = null;
 
-    function playSound(type, velocity) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        if (velocity < 0.5) return; // Don't play for tiny movements
-
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        if (type === 'hit') {
-            // Wood block clack sound
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-            gainNode.gain.setValueAtTime(Math.min(velocity / 10, 0.5), audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1);
-        } else if (type === 'wall') {
-            // Thud sound
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(Math.min(velocity / 10, 0.3), audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.15);
+    function initAudio() {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
         }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playSound(velocity) {
+        if (!audioCtx || velocity < 0.8) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        // "Clack" sound
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+        
+        // Volume based on impact speed
+        let vol = Math.min(velocity / 20, 0.3);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
     }
 
     // --- GAME CONSTANTS ---
     const BOARD_SIZE = 600;
-    const POCKET_RADIUS = 30; // Slightly larger visually
-    const FRICTION = 0.982; // Slippery but realistic
-    const WALL_BOUNCE = 0.7; // Walls absorb energy
+    const POCKET_RADIUS = 35; 
+    const FRICTION = 0.98;
 
     let pieces = [];
     let isDragging = false;
     let isPositioning = true;
-    let dragStartX, dragStartY;
     let shotPower = 0;
     let shotAngle = 0;
 
-    // --- INPUT HANDLER ---
+    // --- INPUT HELPER ---
     function getInputPos(e) {
         const rect = canvas.getBoundingClientRect();
         let clientX = e.touches ? e.touches[0].clientX : e.clientX;
         let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        // Scale logic to match canvas internal resolution (600x600) 
+        // with CSS displayed size
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
+
         return {
             x: (clientX - rect.left) * scaleX,
             y: (clientY - rect.top) * scaleY
@@ -134,7 +134,7 @@
             this.x = x;
             this.y = y;
             this.radius = radius;
-            this.baseColor = color;
+            this.color = color;
             this.type = type;
             this.mass = mass;
             this.vx = 0;
@@ -145,56 +145,34 @@
         draw() {
             if (this.isPotted) return;
 
-            // 1. Drop Shadow (gives height)
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-            ctx.shadowBlur = 6;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-
+            // Shadow
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-            // 2. 3D Gradient (Lighting)
-            // Light coming from Top-Left
-            let grad = ctx.createRadialGradient(
-                this.x - this.radius/3, this.y - this.radius/3, this.radius/10, 
-                this.x, this.y, this.radius
-            );
-            
-            if (this.type === 'white') {
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(1, '#dcdde1');
-            } else if (this.type === 'black') {
-                grad.addColorStop(0, '#555');
-                grad.addColorStop(1, '#1e272e');
-            } else if (this.type === 'queen') {
-                grad.addColorStop(0, '#ff7675');
-                grad.addColorStop(1, '#d63031');
-            } else if (this.type === 'striker') {
-                grad.addColorStop(0, '#ffeaa7');
-                grad.addColorStop(1, '#fdcb6e');
-            }
-
-            ctx.fillStyle = grad;
+            ctx.arc(this.x + 2, this.y + 2, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fill();
 
-            // Reset Shadow for inner details
-            ctx.shadowColor = 'transparent';
-
-            // 3. Inner Detail (Rings)
-            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-            ctx.lineWidth = 2;
+            // Body
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI*2);
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            
+            // Highlight active striker
+            if (this.type === 'striker' && isDragging) {
+                ctx.fillStyle = "#2ecc71"; // Green when dragging
+            } else {
+                ctx.fillStyle = this.color;
+            }
+            ctx.fill();
+            
+            // Stroke
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Striker special design
-            if (this.type === 'striker') {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI*2);
-                ctx.fillStyle = '#fff';
-                ctx.fill();
-            }
+            // 3D Shine
+            ctx.beginPath();
+            ctx.arc(this.x - 3, this.y - 3, this.radius * 0.3, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fill();
         }
 
         update() {
@@ -205,34 +183,22 @@
             this.vx *= FRICTION;
             this.vy *= FRICTION;
 
-            if (Math.abs(this.vx) < 0.05) this.vx = 0;
-            if (Math.abs(this.vy) < 0.05) this.vy = 0;
+            if (Math.abs(this.vx) < 0.1) this.vx = 0;
+            if (Math.abs(this.vy) < 0.1) this.vy = 0;
 
-            // Wall Collisions
-            let hitWall = false;
-            if (this.x - this.radius < 0) { 
-                this.x = this.radius; this.vx *= -WALL_BOUNCE; hitWall = true; 
-            }
-            if (this.x + this.radius > BOARD_SIZE) { 
-                this.x = BOARD_SIZE - this.radius; this.vx *= -WALL_BOUNCE; hitWall = true; 
-            }
-            if (this.y - this.radius < 0) { 
-                this.y = this.radius; this.vy *= -WALL_BOUNCE; hitWall = true; 
-            }
-            if (this.y + this.radius > BOARD_SIZE) { 
-                this.y = BOARD_SIZE - this.radius; this.vy *= -WALL_BOUNCE; hitWall = true; 
-            }
-
-            if (hitWall) playSound('wall', Math.hypot(this.vx, this.vy));
+            // Walls
+            if (this.x - this.radius < 0) { this.x = this.radius; this.vx *= -0.7; }
+            if (this.x + this.radius > BOARD_SIZE) { this.x = BOARD_SIZE - this.radius; this.vx *= -0.7; }
+            if (this.y - this.radius < 0) { this.y = this.radius; this.vy *= -0.7; }
+            if (this.y + this.radius > BOARD_SIZE) { this.y = BOARD_SIZE - this.radius; this.vy *= -0.7; }
 
             // Pockets
-            [{x:0,y:0}, {x:600,y:0}, {x:0,y:600}, {x:600,y:600}].forEach(p => {
-                let dist = Math.hypot(p.x - this.x, p.y - this.y);
-                if (dist < POCKET_RADIUS) {
+            const pockets = [{x:0,y:0}, {x:600,y:0}, {x:0,y:600}, {x:600,y:600}];
+            pockets.forEach(p => {
+                if (Math.hypot(p.x - this.x, p.y - this.y) < POCKET_RADIUS) {
                     this.isPotted = true;
                     this.vx = 0; this.vy = 0;
-                    playSound('hit', 10); // Loud sound for goal
-                    if(this.type === 'striker') setTimeout(resetStriker, 800);
+                    if(this.type === 'striker') setTimeout(resetStriker, 500);
                 }
             });
         }
@@ -240,19 +206,149 @@
 
     function initBoard() {
         pieces = [];
-        const cx = BOARD_SIZE / 2;
-        const cy = BOARD_SIZE / 2;
-
-        // Realistic Setup Pattern (Hexagon)
-        pieces.push(new Piece(cx, cy, 14, 'red', 'queen', 1.2)); // Queen slightly heavier
+        const cx = 300, cy = 300;
+        pieces.push(new Piece(cx, cy, 14, '#e74c3c', 'queen', 1));
         
-        // Inner Circle
-        for (let i = 0; i < 6; i++) {
-            let angle = (i * 60) * (Math.PI / 180);
-            pieces.push(new Piece(cx + Math.cos(angle)*29, cy + Math.sin(angle)*29, 13, 'white', 'white', 1));
+        for(let i=0; i<6; i++) {
+            let a = i * 60 * Math.PI/180;
+            pieces.push(new Piece(cx + Math.cos(a)*28, cy + Math.sin(a)*28, 12, i%2==0?'white':'#333', 'coin', 1));
         }
-        // Outer Circle
-        for (let i = 0; i < 12; i++) {
-             let angle = (i * 30) * (Math.PI / 180);
-             // Alternate black and white properly for carrom
-             let type = (i % 2 === 0) ? 'black' : 'black'; // Simplified for visual balance
+        resetStriker();
+    }
+
+    function resetStriker() {
+        pieces = pieces.filter(p => p.type !== 'striker');
+        pieces.push(new Piece(300, 480, 20, '#f1c40f', 'striker', 2));
+        isPositioning = true;
+        statusText.innerText = "Drag Left/Right to aim. Pull Back to shoot.";
+    }
+
+    function resolveCollision(p1, p2) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < p1.radius + p2.radius) {
+            playSound(Math.hypot(p1.vx, p1.vy)); // Play Sound
+
+            const angle = Math.atan2(dy, dx);
+            const overlap = (p1.radius + p2.radius - dist) / 2 + 0.1; // +0.1 to prevent sticking
+            
+            p1.x -= overlap * Math.cos(angle); p1.y -= overlap * Math.sin(angle);
+            p2.x += overlap * Math.cos(angle); p2.y += overlap * Math.sin(angle);
+
+            const nx = dx / dist; const ny = dy / dist;
+            const dvx = p1.vx - p2.vx; const dvy = p1.vy - p2.vy;
+            const dot = dvx * nx + dvy * ny;
+
+            if (dot > 0) {
+                const impulse = 2 * dot / (p1.mass + p2.mass);
+                p1.vx -= impulse * p2.mass * nx; p1.vy -= impulse * p2.mass * ny;
+                p2.vx += impulse * p1.mass * nx; p2.vy += impulse * p1.mass * ny;
+            }
+        }
+    }
+
+    // --- EVENTS ---
+    function handleStart(e) {
+        initAudio(); // Initialize Audio on first touch
+        const pos = getInputPos(e);
+        const striker = pieces.find(p => p.type === 'striker');
+
+        if (striker && !striker.isPotted && Math.abs(striker.vx) < 0.2) {
+            // Check distance (Generous hitbox)
+            if (Math.hypot(pos.x - striker.x, pos.y - striker.y) < 60) {
+                isDragging = true;
+            }
+        }
+    }
+
+    function handleMove(e) {
+        if (!isDragging && !isPositioning) return;
+        
+        e.preventDefault(); // Stop scrolling
+        const pos = getInputPos(e);
+        const striker = pieces.find(p => p.type === 'striker');
+
+        if (!striker) return;
+
+        if (isDragging) {
+            isPositioning = false; // Once you drag back, you can't slide anymore
+            const dx = pos.x - striker.x;
+            const dy = pos.y - striker.y;
+            shotAngle = Math.atan2(dy, dx);
+            shotPower = Math.min(Math.hypot(dx, dy), 150) * 0.2;
+            statusText.innerText = "Aiming... Release to Fire!";
+        } else if (isPositioning) {
+            // Slide logic
+            if (pos.y > 440 && pos.y < 520) {
+                striker.x = Math.max(40, Math.min(560, pos.x));
+            }
+        }
+    }
+
+    function handleEnd() {
+        if (isDragging) {
+            const striker = pieces.find(p => p.type === 'striker');
+            if (striker) {
+                striker.vx = -Math.cos(shotAngle) * shotPower * 2;
+                striker.vy = -Math.sin(shotAngle) * shotPower * 2;
+                playSound(shotPower * 2);
+                statusText.innerText = "Shot Fired!";
+            }
+        }
+        isDragging = false;
+        shotPower = 0;
+    }
+
+    // Add listeners
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('touchstart', handleStart, {passive: false});
+    canvas.addEventListener('touchmove', handleMove, {passive: false});
+    canvas.addEventListener('touchend', handleEnd);
+
+    // --- LOOP ---
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Pockets
+        ctx.fillStyle = "#222";
+        [{x:0,y:0}, {x:600,y:0}, {x:0,y:600}, {x:600,y:600}].forEach(p => {
+             ctx.beginPath(); ctx.arc(p.x, p.y, POCKET_RADIUS, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Draw Baseline
+        ctx.beginPath(); ctx.moveTo(40, 480); ctx.lineTo(560, 480);
+        ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.lineWidth = 2; ctx.stroke();
+
+        // Update Pieces
+        for (let i = 0; i < pieces.length; i++) {
+            for (let j = i + 1; j < pieces.length; j++) {
+                if (!pieces[i].isPotted && !pieces[j].isPotted) resolveCollision(pieces[i], pieces[j]);
+            }
+            pieces[i].update();
+            pieces[i].draw();
+        }
+
+        // Draw Aim Line
+        if (isDragging) {
+            const striker = pieces.find(p => p.type === 'striker');
+            if (striker) {
+                ctx.beginPath();
+                ctx.moveTo(striker.x, striker.y);
+                ctx.lineTo(striker.x - Math.cos(shotAngle) * shotPower * 10, striker.y - Math.sin(shotAngle) * shotPower * 10);
+                ctx.strokeStyle = "#e74c3c"; ctx.lineWidth = 4; ctx.stroke();
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function resetGame() { initBoard(); }
+    initBoard();
+    animate();
+
+</script>
+</body>
+</html>
