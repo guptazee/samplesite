@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Realistic Carrom</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e272e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #d2dae2;
+            overflow: hidden;
+            touch-action: none;
+        }
+        canvas {
+            background-color: #fceeb5; /* Polished wood color */
+            border: 20px solid #5d4037; /* Dark Wood Frame */
+            border-radius: 15px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.3), 0 20px 30px rgba(0,0,0,0.5);
+            width: 95%;
+            max-width: 600px;
+            height: auto;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #96281b;
+            transition: transform 0.1s;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        p { margin-bottom: 10px; font-size: 14px; opacity: 0.8; }
+        .instruction { font-size: 12px; color: #ffdd59; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin: 10px 0; text-shadow: 2px 2px 4px black;">Pro Carrom 3D</h2>
+    <div class="instruction">Tap anywhere first to enable Sound!</div>
+    <canvas id="carromBoard" width="600" height="600"></canvas>
+    <div class="controls">
+        <p id="status">Drag Striker to Position &bull; Pull to Shoot</p>
+        <button onclick="resetGame()">Reset Board</button>
+    </div>
+
+<script>
+    const canvas = document.getElementById('carromBoard');
+    const ctx = canvas.getContext('2d');
+
+    // --- AUDIO SYSTEM (Procedural - No files needed) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = new AudioContext();
+
+    function playSound(type, velocity) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (velocity < 0.5) return; // Don't play for tiny movements
+
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === 'hit') {
+            // Wood block clack sound
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(Math.min(velocity / 10, 0.5), audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'wall') {
+            // Thud sound
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(Math.min(velocity / 10, 0.3), audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+    }
+
+    // --- GAME CONSTANTS ---
+    const BOARD_SIZE = 600;
+    const POCKET_RADIUS = 30; // Slightly larger visually
+    const FRICTION = 0.982; // Slippery but realistic
+    const WALL_BOUNCE = 0.7; // Walls absorb energy
+
+    let pieces = [];
+    let isDragging = false;
+    let isPositioning = true;
+    let dragStartX, dragStartY;
+    let shotPower = 0;
+    let shotAngle = 0;
+
+    // --- INPUT HANDLER ---
+    function getInputPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    class Piece {
+        constructor(x, y, radius, color, type, mass) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.baseColor = color;
+            this.type = type;
+            this.mass = mass;
+            this.vx = 0;
+            this.vy = 0;
+            this.isPotted = false;
+        }
+
+        draw() {
+            if (this.isPotted) return;
+
+            // 1. Drop Shadow (gives height)
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+
+            // 2. 3D Gradient (Lighting)
+            // Light coming from Top-Left
+            let grad = ctx.createRadialGradient(
+                this.x - this.radius/3, this.y - this.radius/3, this.radius/10, 
+                this.x, this.y, this.radius
+            );
+            
+            if (this.type === 'white') {
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(1, '#dcdde1');
+            } else if (this.type === 'black') {
+                grad.addColorStop(0, '#555');
+                grad.addColorStop(1, '#1e272e');
+            } else if (this.type === 'queen') {
+                grad.addColorStop(0, '#ff7675');
+                grad.addColorStop(1, '#d63031');
+            } else if (this.type === 'striker') {
+                grad.addColorStop(0, '#ffeaa7');
+                grad.addColorStop(1, '#fdcb6e');
+            }
+
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Reset Shadow for inner details
+            ctx.shadowColor = 'transparent';
+
+            // 3. Inner Detail (Rings)
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI*2);
+            ctx.stroke();
+
+            // Striker special design
+            if (this.type === 'striker') {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI*2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+        }
+
+        update() {
+            if (this.isPotted) return;
+
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vx *= FRICTION;
+            this.vy *= FRICTION;
+
+            if (Math.abs(this.vx) < 0.05) this.vx = 0;
+            if (Math.abs(this.vy) < 0.05) this.vy = 0;
+
+            // Wall Collisions
+            let hitWall = false;
+            if (this.x - this.radius < 0) { 
+                this.x = this.radius; this.vx *= -WALL_BOUNCE; hitWall = true; 
+            }
+            if (this.x + this.radius > BOARD_SIZE) { 
+                this.x = BOARD_SIZE - this.radius; this.vx *= -WALL_BOUNCE; hitWall = true; 
+            }
+            if (this.y - this.radius < 0) { 
+                this.y = this.radius; this.vy *= -WALL_BOUNCE; hitWall = true; 
+            }
+            if (this.y + this.radius > BOARD_SIZE) { 
+                this.y = BOARD_SIZE - this.radius; this.vy *= -WALL_BOUNCE; hitWall = true; 
+            }
+
+            if (hitWall) playSound('wall', Math.hypot(this.vx, this.vy));
+
+            // Pockets
+            [{x:0,y:0}, {x:600,y:0}, {x:0,y:600}, {x:600,y:600}].forEach(p => {
+                let dist = Math.hypot(p.x - this.x, p.y - this.y);
+                if (dist < POCKET_RADIUS) {
+                    this.isPotted = true;
+                    this.vx = 0; this.vy = 0;
+                    playSound('hit', 10); // Loud sound for goal
+                    if(this.type === 'striker') setTimeout(resetStriker, 800);
+                }
+            });
+        }
+    }
+
+    function initBoard() {
+        pieces = [];
+        const cx = BOARD_SIZE / 2;
+        const cy = BOARD_SIZE / 2;
+
+        // Realistic Setup Pattern (Hexagon)
+        pieces.push(new Piece(cx, cy, 14, 'red', 'queen', 1.2)); // Queen slightly heavier
+        
+        // Inner Circle
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * 60) * (Math.PI / 180);
+            pieces.push(new Piece(cx + Math.cos(angle)*29, cy + Math.sin(angle)*29, 13, 'white', 'white', 1));
+        }
+        // Outer Circle
+        for (let i = 0; i < 12; i++) {
+             let angle = (i * 30) * (Math.PI / 180);
+             // Alternate black and white properly for carrom
+             let type = (i % 2 === 0) ? 'black' : 'black'; // Simplified for visual balance
