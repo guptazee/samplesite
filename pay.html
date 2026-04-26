@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Chili Restaurant - QR Generator</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #f8f9fa; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: 40px auto;
+        }
+        h2 { color: #d32f2f; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        h4 { color: #666; margin-top: 0; margin-bottom: 25px; font-weight: normal; }
+        input[type="number"] { 
+            width: 80%; 
+            padding: 12px; 
+            font-size: 18px; 
+            border: 2px solid #ccc; 
+            border-radius: 6px; 
+            text-align: center;
+        }
+        input[type="number"]:focus {
+            border-color: #d32f2f;
+            outline: none;
+        }
+        button { 
+            width: 85%;
+            padding: 14px; 
+            margin-top: 20px; 
+            font-size: 18px; 
+            font-weight: bold;
+            color: white; 
+            background-color: #d32f2f; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        button:hover { background-color: #b71c1c; }
+        #qr-container { margin-top: 30px; }
+        img { max-width: 100%; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Hot Chili Restaurant</h2>
+        <h4>Quick Pay QR</h4>
+        
+        <label for="amount" style="font-size: 16px; color: #555; display: block; margin-bottom: 10px; font-weight: 600;">Enter Bill Amount (₹)</label>
+        <input type="number" id="amount" placeholder="e.g. 450" required>
+        
+        <button onclick="generateQR()">Generate QR Code</button>
+
+        <div id="qr-container">
+            <img id="qrImage" src="" alt="QR Code will appear here" style="display: none; margin: 0 auto;">
+            <p id="amountDisplay" style="font-size: 22px; font-weight: bold; color: #28a745; display: none; margin-top: 15px;"></p>
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            // Your prefilled details
+            const upiId = "Q968052873@ybl";
+            const payeeName = "HOT CHILI RESTAURANT";
+            const note = "bill amount";
+            
+            // Get the amount entered by the user
+            const amount = document.getElementById('amount').value;
+
+            // Validate the amount
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid bill amount.");
+                return;
+            }
+
+            // Construct the UPI payment link with the 'tn' (transaction note) parameter
+            const upiString = `upi://pay?pa=${upiId}&pn=${payeeName}&tn=${note}&am=${amount}&cu=INR`;
+            
+            // Encode the link to make it safe for the URL
+            const encodedUpiString = encodeURIComponent(upiString);
+
+            // Generate the QR code image using a public API
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedUpiString}`;
+
+            // Display the QR Code and the confirmation text
+            const qrImage = document.getElementById('qrImage');
+            const amountDisplay = document.getElementById('amountDisplay');
+            
+            qrImage.src = qrUrl;
+            qrImage.style.display = 'block';
+            
+            amountDisplay.innerText = `Scan to pay ₹${amount}`;
+            amountDisplay.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
