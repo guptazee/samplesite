@@ -134,34 +134,3 @@
     </script>
 </body>
 </html>            
-            // Get the amount entered by the user
-            const amount = document.getElementById('amount').value;
-
-            // Validate the amount
-            if (!amount || amount <= 0) {
-                alert("Please enter a valid bill amount.");
-                return;
-            }
-
-            // Construct the UPI payment link with the 'tn' (transaction note) parameter
-            const upiString = `upi://pay?pa=${upiId}&pn=${payeeName}&tn=${note}&am=${amount}&cu=INR`;
-            
-            // Encode the link to make it safe for the URL
-            const encodedUpiString = encodeURIComponent(upiString);
-
-            // Generate the QR code image using a public API
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedUpiString}`;
-
-            // Display the QR Code and the confirmation text
-            const qrImage = document.getElementById('qrImage');
-            const amountDisplay = document.getElementById('amountDisplay');
-            
-            qrImage.src = qrUrl;
-            qrImage.style.display = 'block';
-            
-            amountDisplay.innerText = `Scan to pay ₹${amount}`;
-            amountDisplay.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
